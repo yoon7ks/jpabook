@@ -28,6 +28,7 @@ public class JpaMain {
         try {
             tx.begin(); // [트랜잭션] - 시작
             logic(entityManager); // [비지니스 로직] - 실행
+            testDetached(entityManager);
             // 커밋하는 순간 데이터베이스에 insert sql을 보낸다. (내부 쿼리 저장소에 insert sql을 차곡차곡 모아두고
             // 트랜잭션을 커밋할때 모아둔 쿼리를 데이터베이스에 보내는데 이것을 '트랜잭션을 지원하는 쓰기 지연(transactional write-behind)이라 한다.
             tx.commit(); // [트랜잭션] - 커밋
@@ -39,6 +40,7 @@ public class JpaMain {
             e.printStackTrace();
             tx.rollback(); // [트랜잭션] - 롤백
         } finally {
+            // 영속성컨텍스트가 종료되어 더이상 member가 관리되지 않는다.
             entityManager.close(); // [엔티티 매니저] - 종료
         }
 
@@ -46,7 +48,7 @@ public class JpaMain {
 
     }
 
-    private static void logic(EntityManager entityManager) {
+    private static void logic(EntityManager entityManager) throws Exception {
 
         String id = "id1";
         String id2 = "id2";
@@ -69,8 +71,13 @@ public class JpaMain {
         // 이제 member1와 member2 엔터티 인스턴스는 1차캐시에 있다. 따라서 이 엔터티를 조회하면
         // 메모리에 있는 1차 캐시에서 바로 불러온다. --> 성능상 이점
         Member findMember = entityManager.find(Member.class, id);
-        Member findMember2 = entityManager.find(Member.class, id2);
         System.out.println("findMember=" + findMember.getUsername() + ", age=" + findMember.getAge());
+
+        Member findMember2 = entityManager.find(Member.class, id2);
+
+        if (findMember2 != null) {
+            System.out.println("findMember2=" + findMember2.getUsername() + ", age=" + findMember2.getAge());
+        }
 
         Member a = entityManager.find(Member.class, id);
         Member b = entityManager.find(Member.class, id);
@@ -87,6 +94,29 @@ public class JpaMain {
         System.out.println("member.size=" + members.size());
 
         entityManager.remove(member);
+
+    }
+
+    private static void testDetached(EntityManager entityManager) {
+        // 회원 엔티티생성, 비영속 상태
+        Member member = new Member();
+        member.setId("memberA");
+        member.setUsername("회원A");
+
+        // 회원 엔티티 영속상태
+        entityManager.persist(member);
+
+        // 회원 엔티티를 영속성컨텍스트에서 분리, 준영속 상태
+        // 더이상 해당 엔터티를 관리하지 말라는 것.
+        // "1차 캐시부터 쓰기 지연 SQL 저장소까지" 해당 엔티티를 관리하기 위한 모든 정보가 제거된다.
+        // 영속상태였다가~ 더는 영속성컨텍스트가 관리하지 않는 상태. -> 준영속 상태
+        entityManager.detach(member);
+
+        Member member1 = entityManager.find(Member.class, "memberA");
+        // 영속성 컨텍스트 초기화
+        entityManager.clear();
+        // 준영속 상태이므로 변경감지는 동작하지 않는다. 따라서 이름을 변경해도 디비에 반영되지 않는다.
+        member1.setUsername("changeName");
 
     }
 
