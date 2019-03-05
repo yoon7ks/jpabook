@@ -28,7 +28,7 @@ public class JpaMain {
         try {
             tx.begin(); // [트랜잭션] - 시작
             logic(entityManager); // [비지니스 로직] - 실행
-            testDetached(entityManager);
+            //testDetached(entityManager);
             // 커밋하는 순간 데이터베이스에 insert sql을 보낸다. (내부 쿼리 저장소에 insert sql을 차곡차곡 모아두고
             // 트랜잭션을 커밋할때 모아둔 쿼리를 데이터베이스에 보내는데 이것을 '트랜잭션을 지원하는 쓰기 지연(transactional write-behind)이라 한다.
             tx.commit(); // [트랜잭션] - 커밋
@@ -94,6 +94,10 @@ public class JpaMain {
         System.out.println("member.size=" + members.size());
 
         entityManager.remove(member);
+
+        Board board = new Board();
+        entityManager.persist(board);
+        System.out.println("board.id=" + board.getId());
 
     }
 

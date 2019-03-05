@@ -1,0 +1,77 @@
+* 객체와 테이블 매핑 : @Entity, @Table
+* 기본 키 매핑 : @Id
+* 필드와 컬럼 매핑 : @Column
+* 연관관계 매핑 : @ManyToOne, @JoinColumn
+
+1. @Entity
+    name
+        jpa에서 사용할 엔티티이름을 지정한다. 설정하지 않으면 보통 기본값인 클래스 이름을 사용한다. 충돌나지 않도록 주의.
+    주의 사항
+        기본 생성자는 필수다.(파라메터가 없는 Public 또는 protected 생성자)
+        final 클래스, enum, interface, inner 클래스에서는 사용할 수 없다.
+        저장할 필드에 final을 사용하면 안된다.
+
+
+2. @Table
+    name
+        매핑할 테이블 이름 (기본값: 엔티티이름을 사용한다.)
+    catalog
+        catalog 기능이 있는 디비에서 catalog를 매핑한다.
+    schema
+        스키마 기능이 잇는 디비에서 스키마를 매핑한다.
+    uniqueConstraints (DDL)
+        DDL 생성시에 유니크 제약조건을 만든다. 스키마 자동생성기능을 사용해서 DDL을 만들때만 사용된다.
+
+3. 기본키 매핑 (생성 전략)
+    * 직접할당:
+        기본 키를 애플리케이션에서 직접 할당한다.
+
+        @Id 적용가능 자바 타입
+        * 자바 기본형
+        * 자바 래퍼wrapper형
+        * String
+        * java.util.Date
+        * java.sql.Date
+        * java.math.BigDecimal
+        * java.math.BigInteger
+
+        Board board = new Board();
+        board.setId("id1"); // 기본키 직접할당
+        em.persist(board);
+
+        * 기본키 직접할당의 경우 식별자 값 없이 저장하면 예외발생함.
+            하이버네이트를 구현체로 사용하면 jpa 최상위 예외인 javax.persistence.PersistenceException 예외 발생하는데
+            내부에 하이버네이트 예외인 org.hibername.id.IdentifierGenerationException 예외를 포함하고 있음.
+
+
+    * 자동생성: 대리키 사용방식
+        - identity: 기본 키 생성을 데이터베이스에 위임한다.
+            주) MySQL, PostgreSQL, SQL Server, DB2에서 사용한다.
+            예) Mysql의 auto_increment 기능은 데이터베이스가 기본키를 자동으로 생성해주는 것.
+            주의) 이 전략은 트랜잭션을 지원하는 쓰기 지연이 동작하지 않는다.
+                    엔티티가 영속상태가 되려면 식별자가 반드시 필요하다. 그런데 identity 식별자 생성 전략은 엔티티를 데이터 베이스에
+                    저장해야 식별자를 구할 수 있으므로 entityManager()를 호출하는 즉시 insert sql이 디비에 전달된다.
+             * identity 전략과 최적화
+                - Statement.getGernerateKeys()를 사용하면 데이터를 저장하면서 동시에 생성된 기본키 값도 얻어올 수 있다. (1번만 통신)
+
+
+        - sequence: 데이터베이스 시퀀스를 사용해서 기본키를 할당한다.
+            주) Oracle, PostgreSQL, DB2, H2 DB에서 사용할 수 있다.
+            @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="BOARD_SEQ_GENERATOR")
+            @SequenceGenerator
+
+        - table: 키생성 테이블을 사용한다.
+            : code로 test
+
+        - AUTO 아래 2가지 방법 둘다 가능
+             1. @GeneratedValue(strategy = GenerationType.AUTO)
+
+             2.  @Id @GeneratedValue
+                 private Long id;
+
+
+
+
+
+
+

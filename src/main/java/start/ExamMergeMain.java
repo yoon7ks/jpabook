@@ -44,9 +44,9 @@ public class ExamMergeMain {
         System.out.println("em2 contains member=" + entityManager2.contains(member));
         System.out.println("em2 contains mergeMember=" + entityManager2.contains(mergeMember));
 
-        Member member1 = new Member();
-        Member newMember = entityManager2.merge(member1); // 비영속 병합
-        tx2.commit();
+        //Member member1 = new Member();
+        //Member newMember = entityManager2.merge(member1); // 비영속 병합
+        //tx2.commit();
         // 병합은 파라미터로 넘어온 엔티티의 식별자 값으로 영속성 컨텍스트를 조회하고 찾는 엔터티가 없으면 디비에서 조회한다.
         // 디비에서도 발견하지 못하면 새로운 엔티티를 생성해서 병합한다.
         // 병합은 준영속, 비영속을 신경쓰지 않는다. save or update 기능을 수행한다.
