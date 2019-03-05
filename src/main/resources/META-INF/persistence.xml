@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+
+    <persistence-unit name="jpabook">
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
+            <property name="javax.persistence.jdbc.user" value="ezEKP2017" />
+            <property name="javax.persistence.jdbc.password" value="ezflow_010" />
+            <property name="javax.persistence.jdbc.url"
+                      value="jdbc:mariadb://192.168.56.101:3306/jmocha?useSSL=false" />
+            <property name="hibernate.dialeect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <!--<property name="hibernate.dialeect" value="org.hibernate.dialect.Oracle10gDialect" />-->
+
+            <!-- option -->
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.use_sql_comments" value="true" />
+            <property name="hibernate.id.new_generator_mappings" value="true" />
+        </properties>
+    </persistence-unit>
+
+</persistence>

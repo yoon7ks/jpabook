@@ -1,0 +1,85 @@
+# 영속성 컨텍스트란?
+
+'엔터티를 영구 저장하는 환경'
+
+entityManager.persist(member);
+: 엔터티매니저를 사용해서 회원 엔터티를 영속성 컨텍스트에 저장한다.
+: 엔터티매니저를 통해서 영속성 컨텍스트에 접근할 수 있고, 관리할 수 있다.
+
+
+# 엔터티 생명주기
+1. 비영속: 영속성컨텍스트와 전혀 관계가 없는 상태 (객체를 생성한 상태)
+    Member member = new Member();
+    member.setId(id);
+    member.setUsername("윤진");
+    member.setAge(30);
+2. 영속: 영속성 컨텍스트에 저장된 상태 (객체를 저장한 상태) -> 영속성 컨텍스트에 의해 관리된다는 뜻이다.
+    entityManager.persist(member);
+    entityManager.find();
+    JPQL을 사용해 조회한 경우
+3. 준영속: 영속성 컨텍스트에 저장되었다가 분리된 상태
+    entityManager.detach(member);
+    entityManager.clear();
+    entityManager.close();
+4. 삭제: 삭제된 상태
+    entityManager.remove(member);
+
+
+# 특징
+1. persistence context와 식별자 값
+    - pk(식별자 값)이 반드시 있어야 한다.
+2. persistence context와 DB 저장
+    - JPA는 보통 트랜젝션을 커밋하는 순간 영속성 컨텍스트에 새로 저장된 엔터티를 DB에 반영하는데 이것을 플러시(flush) 라고 한다.
+
+3. persistence context가 엔터티를 관리하는 경우 장점
+    - 1차 캐시
+    - 동일성 보장
+    - 트랜잭션을 지원하는 쓰기 지원
+    - 변경 감지
+    - 지연 로딩
+
+# 엔터티 조회
+내부캐시 - 1차 캐시
+persistence context 내부에 Map이 하나있고 키는 @Id로 매핑한 식별자고 값은 엔터티 인스턴스다.
+    // 엔터티를 생성한 상태(비영속)
+    Member member = new Member();
+    member.setId(id);
+    member.setUsername("윤진");
+    member.setAge(30);
+
+    // 엔터티를 영속
+    entityManager.persist(member);
+    --> 1차 캐시에 회원 엔터티를 저장한다. 회원엔터티는 아직 데이터베이스에 저장되지 않았다.
+
+    // find()를 호출하면 먼저 1차 캐시에서 엔터티를 찾고 만약 찾는 엔터티가 1차캐시에 없으면 DB에서 조회한다.
+    Member findMember = entityManager.find(Member.class, id);
+
+    --------1차캐시--------
+      @Id     |   Entity
+    "member1" |  "member"
+
+# 트랜잭션을 지원하는 쓰기 지연이 가능한 이유
+
+begin(); // 트랜잭션 시작
+
+save(A);
+save(B);
+save(C);
+
+commit(); // 트랜잭션 커밋
+
+1. 데이터를 저장하는 즉시 등록 쿼리를 데이터베이스에 보낸다. 마지막에 트랜잭션을 커밋한다.
+2. 데이터를 저장하면 등록 쿼리를 데이터베이스에 보내지 않고 메모리에 모아둔다. 모아둔 등록쿼리를 데이터베이스에 보낸뒤 커밋한다.
+
+2개의 실행결과는 같다. ABC모두 트랜잭션을 커밋하면 함께 저장되고 롤백되면 함께 저장되지 않는다.
+어떻게는 커밋 직전에만 디비에 SQL을 전달하면 된다. -> 이것이 트랜잭션을 지원하는 쓰기 지연이 가능한 이유이다.
+이 기능을 활용하면 모아둔 등록 쿼리를 데이터베이스에 한번에 전달해서 성능을 최적화 할 수 있다....
+
+
+
+# 변경감지
+1. 트랜잭션을 커밋하면 엔터티매니저 내부에서 먼저 플러시flush가 호출된다.
+2. 엔터티와 스냅샷을 비교해서 변경된 엔터티를 찾는다.
+3. 변경된 엔터티가 있으면 수정쿼리를 생성해서 쓰기 지연 SQL저장소에 보낸다.
+4. 쓰기 지연 저장소의 SQL을 디비에 보낸다.
+5. 디비 트랜잭션을 커밋한다.
