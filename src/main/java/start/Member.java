@@ -3,7 +3,7 @@ package start;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity // 이 클래스를 테이블과 매핑한다고 jpa에게 알려준다. @Entity가 사용된 클래스를 엔티티 클래스라고 한다.
+ // 이 클래스를 테이블과 매핑한다고 jpa에게 알려준다. @Entity가 사용된 클래스를 엔티티 클래스라고 한다.
 @Table(name = "MEMBER", uniqueConstraints = {@UniqueConstraint(
         name = "NAME_AGE_UNIQUE",
         columnNames = {"NAME", "AGE"}

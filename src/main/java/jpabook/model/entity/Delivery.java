@@ -1,34 +1,23 @@
 package jpabook.model.entity;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "MEMBER")
-public class Member extends BaseEntity {
-
-    // BaseEntity 클래스를 상속받아서 등록일과 수정일을 추가한다.
+public class Delivery {
 
     @Id @GeneratedValue
-    @Column(name = "MEMBER_ID")
+    @Column(name = "delivery_id")
     private Long id;
 
-    private String name;
+    @OneToOne(mappedBy = "delivery")
+    private Order order;
+
     private String city;
     private String street;
     private String zipcode;
 
-    @OneToMany(mappedBy = "member")
-    private List<Order> orders = new ArrayList<Order>();
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status;
 
     public Long getId() {
         return id;
@@ -38,12 +27,12 @@ public class Member extends BaseEntity {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     public String getCity() {
@@ -68,5 +57,13 @@ public class Member extends BaseEntity {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
+    }
+
+    public DeliveryStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DeliveryStatus status) {
+        this.status = status;
     }
 }
